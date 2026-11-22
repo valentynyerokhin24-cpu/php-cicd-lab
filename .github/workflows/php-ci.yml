@@ -1,10 +1,14 @@
 name: PHP CI Application
 
 on:
+  workflow_dispatch: {}
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -30,4 +34,6 @@ jobs:
       - name: Demonstrate GitHub Secrets
         env:
           MY_SUPER_SECRET_KEY: ${{ secrets.MY_SUPER_SECRET_KEY }}
-        run: echo "Secret is loaded and masked: $MY_SUPER_SECRET_KEY"
+        run: |
+          echo "Secret is loaded and masked:"
+          echo "$MY_SUPER_SECRET_KEY"
