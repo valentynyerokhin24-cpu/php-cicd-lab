@@ -1,11 +1,14 @@
 name: PHP CI Application
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
+permissions:
+  contents: read
 
 jobs:
   build:
