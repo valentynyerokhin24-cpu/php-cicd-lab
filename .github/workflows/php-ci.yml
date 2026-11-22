@@ -34,4 +34,6 @@ jobs:
       - name: Demonstrate GitHub Secrets
         env:
           MY_SUPER_SECRET_KEY: ${{ secrets.MY_SUPER_SECRET_KEY }}
-        run: echo "Secret is loaded and masked: $MY_SUPER_SECRET_KEY"
+        run: |
+          echo "Secret is loaded and masked:"
+          echo "$MY_SUPER_SECRET_KEY"
