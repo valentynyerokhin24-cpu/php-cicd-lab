@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Exception;
 use Faker\Factory;
-
 use function App\Services\applyDiscount;
 use function App\Services\calculateLineTotal;
 use function App\Services\countCyrillicALetters;
@@ -53,16 +52,16 @@ $letterCount = countCyrillicALetters($letterSample);
             <h2>Типізовані операції</h2>
             <p>Вартість 2 товарів по 749,99: <?= number_format($lineTotal, 2, ',', ' ') ?> грн</p>
             <?php
-            try {
-                applyDiscount(749.99, 150);
-            } catch (Exception $exception) {
-                echo '<p>Помилка знижки: '
-                    .htmlspecialchars($exception->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-                    .'</p>';
-            } finally {
-                echo '<p>Завершення спроби розрахунку.</p>';
-            }
-            ?>
+try {
+    applyDiscount(749.99, 150);
+} catch (Exception $exception) {
+    echo '<p>Помилка знижки: '
+        .htmlspecialchars($exception->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+        .'</p>';
+} finally {
+    echo '<p>Завершення спроби розрахунку.</p>';
+}
+?>
         </section>
 
         <section>
