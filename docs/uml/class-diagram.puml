@@ -1,0 +1,273 @@
+@startuml
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+hide empty members
+
+abstract class User <<Model>> {
+  - id: int
+  - fullName: string
+  - email: string
+  - passwordHash: string
+  - phone: ?string
+  - status: UserStatus
+  - createdAt: DateTimeImmutable
+  + authenticate(password: string): bool
+  + updateProfile(name: string, phone: ?string): void
+  + changePassword(old: string, new: string): bool
+  + deactivate(): void
+  + hasRole(role: string): bool
+}
+
+class Customer <<Model>> {
+  - loyaltyPoints: int
+  - marketingConsent: bool
+  - defaultAddressId: ?int
+  - registeredAt: DateTimeImmutable
+  - preferredDelivery: ?string
+  + addLoyaltyPoints(points: int): void
+  + redeemLoyaltyPoints(points: int): bool
+  + setDefaultAddress(addressId: int): void
+  + getActiveCart(): Cart
+  + canReview(productId: int): bool
+}
+
+class Administrator <<Model>> {
+  - employeeNumber: string
+  - permissions: array<string>
+  - lastLoginAt: ?DateTimeImmutable
+  - isActive: bool
+  - department: string
+  + canManage(resource: string): bool
+  + activate(): void
+  + suspend(): void
+  + recordLogin(at: DateTimeImmutable): void
+  + getAuditScope(): array<string>
+}
+
+class Address <<Model>> {
+  - id: int
+  - userId: int
+  - recipient: string
+  - city: string
+  - street: string
+  - postalCode: string
+  - countryCode: string
+  + validate(): bool
+  + formatLabel(): string
+  + updateContact(recipient: string, phone: string): void
+  + markAsDefault(): void
+  + isDeliverable(): bool
+}
+
+class Category <<Model>> {
+  - id: int
+  - name: string
+  - slug: string
+  - description: ?string
+  - isActive: bool
+  - sortOrder: int
+  + rename(name: string): void
+  + changeDescription(text: ?string): void
+  + activate(): void
+  + deactivate(): void
+  + getPublishedProducts(): Collection<Product>
+}
+
+class Product <<Model>> {
+  - id: int
+  - categoryId: int
+  - sku: string
+  - name: string
+  - price: Decimal
+  - stockQuantity: int
+  - isPublished: bool
+  + changePrice(price: Decimal): void
+  + reserveStock(quantity: int): bool
+  + releaseStock(quantity: int): void
+  + adjustStock(delta: int): void
+  + isAvailable(quantity: int): bool
+}
+
+class Cart <<Model>> {
+  - id: int
+  - customerId: int
+  - status: CartStatus
+  - expiresAt: ?DateTimeImmutable
+  - createdAt: DateTimeImmutable
+  - updatedAt: DateTimeImmutable
+  + addItem(product: Product, quantity: int): void
+  + removeItem(productId: int): void
+  + updateQuantity(productId: int, quantity: int): void
+  + calculateSubtotal(): Decimal
+  + clear(): void
+}
+
+class CartItem <<Model>> {
+  - id: int
+  - cartId: int
+  - productId: int
+  - quantity: int
+  - unitPriceSnapshot: Decimal
+  - addedAt: DateTimeImmutable
+  + setQuantity(quantity: int): void
+  + increase(quantity: int): void
+  + decrease(quantity: int): void
+  + calculateSubtotal(): Decimal
+  + refreshPrice(product: Product): void
+}
+
+class Order <<Model>> {
+  - id: int
+  - customerId: int
+  - number: string
+  - status: OrderStatus
+  - subtotal: Decimal
+  - deliveryFee: Decimal
+  - total: Decimal
+  - createdAt: DateTimeImmutable
+  + createFromCart(cart: Cart): void
+  + calculateTotal(): Decimal
+  + transitionTo(status: OrderStatus): bool
+  + cancel(reason: string): bool
+  + getPaymentStatus(): PaymentStatus
+}
+
+class OrderItem <<Model>> {
+  - id: int
+  - orderId: int
+  - productId: int
+  - skuSnapshot: string
+  - productNameSnapshot: string
+  - quantity: int
+  - unitPriceSnapshot: Decimal
+  + calculateLineTotal(): Decimal
+  + changeQuantity(quantity: int): void
+  + getSkuSnapshot(): string
+  + getProductNameSnapshot(): string
+  + isValid(): bool
+}
+
+class Payment <<Model>> {
+  - id: int
+  - orderId: int
+  - provider: string
+  - method: PaymentMethod
+  - status: PaymentStatus
+  - amount: Decimal
+  - transactionReference: ?string
+  + authorize(): PaymentResult
+  + markPaid(reference: string): void
+  + markFailed(reason: string): void
+  + refund(amount: Decimal): bool
+  + verifyCallback(payload: array): bool
+}
+
+class Shipment <<Model>> {
+  - id: int
+  - orderId: int
+  - carrier: string
+  - trackingNumber: ?string
+  - status: ShipmentStatus
+  - addressSnapshot: string
+  - shippedAt: ?DateTimeImmutable
+  + createLabel(): string
+  + assignTracking(number: string): void
+  + updateStatus(status: ShipmentStatus): void
+  + getTrackingEvents(): array<TrackingEvent>
+  + markDelivered(at: DateTimeImmutable): void
+}
+
+class Review <<Model>> {
+  - id: int
+  - customerId: int
+  - productId: int
+  - rating: int
+  - comment: string
+  - status: ReviewStatus
+  - createdAt: DateTimeImmutable
+  + validateRating(): bool
+  + edit(rating: int, comment: string): void
+  + submit(): void
+  + publish(): void
+  + reject(reason: string): void
+}
+
+class CatalogController <<Controller>> {
+  - productService: ProductService
+  - categoryRepository: CategoryRepository
+  - searchService: SearchService
+  - viewFactory: ViewFactory
+  - logger: LoggerInterface
+  + index(request: Request): Response
+  + show(productId: int): Response
+  + search(query: string): Response
+  + filter(filters: array): Response
+  + categories(): Response
+}
+
+class CartController <<Controller>> {
+  - cartService: CartService
+  - productRepository: ProductRepository
+  - validator: CartRequestValidator
+  - authorization: AuthorizationService
+  - logger: LoggerInterface
+  + show(): Response
+  + add(productId: int, quantity: int): Response
+  + update(productId: int, quantity: int): Response
+  + remove(productId: int): Response
+  + clear(): Response
+}
+
+class CheckoutController <<Controller>> {
+  - checkoutService: CheckoutService
+  - paymentService: PaymentService
+  - deliveryService: DeliveryService
+  - validator: CheckoutRequestValidator
+  - logger: LoggerInterface
+  + show(): Response
+  + validateAddress(addressId: int): Response
+  + applyDiscount(code: string): Response
+  + submit(request: CheckoutRequest): Response
+  + paymentCallback(payload: array): Response
+}
+
+class OrderController <<Controller>> {
+  - orderService: OrderService
+  - shipmentService: ShipmentService
+  - authorization: AuthorizationService
+  - reportService: ReportService
+  - logger: LoggerInterface
+  + index(): Response
+  + show(orderId: int): Response
+  + cancel(orderId: int, reason: string): Response
+  + track(orderId: int): Response
+  + requestRefund(orderId: int): Response
+}
+
+User <|-- Customer
+User <|-- Administrator
+Customer "1" o-- "0..*" Address : saved addresses
+Category "1" o-- "0..*" Product : groups
+Customer "1" -- "0..1" Cart : owns
+Cart "1" *-- "0..*" CartItem : contains
+CartItem "*" --> "1" Product : refers to
+Customer "1" -- "0..*" Order : places
+Order "1" *-- "1..*" OrderItem : snapshots
+OrderItem "*" --> "0..1" Product : source product
+Order "1" -- "0..*" Payment : payments
+Order "1" -- "0..1" Shipment : delivery
+Customer "1" -- "0..*" Review : writes
+Product "1" -- "0..*" Review : receives
+CatalogController ..> Product
+CatalogController ..> Category
+CartController ..> Cart
+CartController ..> Product
+CheckoutController ..> Cart
+CheckoutController ..> Order
+CheckoutController ..> Payment
+OrderController ..> Order
+OrderController ..> Shipment
+
+@enduml
