@@ -23,20 +23,20 @@ $product = [
 <section>
     <h2>Категорії товарів</h2>
     <ul>
-        <?php foreach ($categories as $category): ?>
+        <?php foreach ($categories as $category) { ?>
             <li><?= htmlspecialchars($category, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></li>
-        <?php endforeach; ?>
+        <?php } ?>
     </ul>
 </section>
 
 <section>
     <h2>Приклад товару</h2>
     <ul>
-        <?php foreach ($product as $attribute => $value): ?>
+        <?php foreach ($product as $attribute => $value) { ?>
             <li>
                 <strong><?= htmlspecialchars($attribute, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>:</strong>
                 <?= htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
             </li>
-        <?php endforeach; ?>
+        <?php } ?>
     </ul>
 </section>

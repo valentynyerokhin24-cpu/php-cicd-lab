@@ -2,9 +2,16 @@
 
 declare(strict_types=1);
 
+use Exception;
 use Faker\Factory;
 
-require_once __DIR__ . '/vendor/autoload.php';
+use function App\Services\applyDiscount;
+use function App\Services\calculateLineTotal;
+use function App\Services\countCyrillicALetters;
+use function App\Services\lastThreeWords;
+use function App\Services\shiftArrayRight;
+
+require_once __DIR__.'/vendor/autoload.php';
 
 $faker = Factory::create();
 $prices = [];
@@ -21,13 +28,13 @@ $filteredPrices = array_values(array_filter(
     }
 ));
 
-$lineTotal = \App\Services\calculateLineTotal(749.99, 2);
+$lineTotal = calculateLineTotal(749.99, 2);
 $numbers = [12, 4, 9, 1];
-$shiftedNumbers = \App\Services\shiftArrayRight($numbers);
+$shiftedNumbers = shiftArrayRight($numbers);
 $text = 'Монітор, клавіатура, миша, відеокарта';
-$lastThreeWords = \App\Services\lastThreeWords($text);
+$lastThreeWords = lastThreeWords($text);
 $letterSample = 'Аа, аксесуари';
-$letterCount = \App\Services\countCyrillicALetters($letterSample);
+$letterCount = countCyrillicALetters($letterSample);
 ?>
 <!DOCTYPE html>
 <html lang="uk">
@@ -40,18 +47,18 @@ $letterCount = \App\Services\countCyrillicALetters($letterSample);
     <main>
         <h1>Лабораторна робота №3: інтернет-магазин комп’ютерної техніки</h1>
 
-        <?php require __DIR__ . '/app/Models/EntityArray.php'; ?>
+        <?php require __DIR__.'/app/Models/EntityArray.php'; ?>
 
         <section>
             <h2>Типізовані операції</h2>
             <p>Вартість 2 товарів по 749,99: <?= number_format($lineTotal, 2, ',', ' ') ?> грн</p>
             <?php
             try {
-                \App\Services\applyDiscount(749.99, 150);
-            } catch (\Exception $exception) {
+                applyDiscount(749.99, 150);
+            } catch (Exception $exception) {
                 echo '<p>Помилка знижки: '
-                    . htmlspecialchars($exception->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-                    . '</p>';
+                    .htmlspecialchars($exception->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                    .'</p>';
             } finally {
                 echo '<p>Завершення спроби розрахунку.</p>';
             }
@@ -63,15 +70,15 @@ $letterCount = \App\Services\countCyrillicALetters($letterSample);
             <p>Згенеровано 10 цін; поріг відбору: <?= number_format($minThreshold, 2, ',', ' ') ?> грн.</p>
             <h3>Усі ціни</h3>
             <ul>
-                <?php foreach ($prices as $price): ?>
+                <?php foreach ($prices as $price) { ?>
                     <li><?= number_format($price, 2, ',', ' ') ?> грн</li>
-                <?php endforeach; ?>
+                <?php } ?>
             </ul>
             <h3>Ціни від порога</h3>
             <ul>
-                <?php foreach ($filteredPrices as $price): ?>
+                <?php foreach ($filteredPrices as $price) { ?>
                     <li><?= number_format($price, 2, ',', ' ') ?> грн</li>
-                <?php endforeach; ?>
+                <?php } ?>
             </ul>
         </section>
 

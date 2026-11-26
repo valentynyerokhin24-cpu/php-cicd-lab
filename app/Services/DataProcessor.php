@@ -7,7 +7,7 @@ namespace App\Services;
 use InvalidArgumentException;
 
 /**
- * @param list<int> $numbers
+ * @param  list<int>  $numbers
  * @return list<int>
  */
 function shiftArrayRight(array $numbers): array
