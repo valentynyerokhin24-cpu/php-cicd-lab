@@ -1,11 +1,18 @@
 {
     "name": "student/ci-cd-lab",
-    "description": "Minimal PHP project for CI/CD testing",
+    "description": "PHP laboratory project for a computer equipment store",
+    "require": {
+        "fakerphp/faker": "^1.24"
+    },
     "require-dev": {
         "phpunit/phpunit": "^10.5",
         "laravel/pint": "^1.13"
     },
     "autoload": {
+        "files": [
+            "app/Services/EntityService.php",
+            "app/Services/DataProcessor.php"
+        ],
         "psr-4": {
             "App\\": "app/"
         }
