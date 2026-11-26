@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Exception;
 use Faker\Factory;
+
 use function App\Services\applyDiscount;
 use function App\Services\calculateLineTotal;
 use function App\Services\countCyrillicALetters;
